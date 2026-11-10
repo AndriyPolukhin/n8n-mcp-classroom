@@ -1,0 +1,81 @@
+---
+---
+
+// GitHub Pages theme (Primer) + the look of workflows.html:
+// grid background, content on a card, light and dark mode.
+@import "jekyll-theme-primer";
+
+:root {
+  --bg: #f5f3ee;
+  --panel: #fffdf8;
+  --ink: #1c1b19;
+  --muted: #6b6862;
+  --line: #d9d5cc;
+  --grid: #e7e3da;
+  --code-bg: #eef1f5;
+  --accent: #5b3fd1;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #121212;
+    --panel: #1b1b1a;
+    --ink: #ecebe7;
+    --muted: #a3a09a;
+    --line: #34322e;
+    --grid: #222120;
+    --code-bg: #1e2228;
+    --accent: #a78bfa;
+  }
+}
+
+body {
+  color: var(--ink);
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+// The page content sits on a card, like the sections of workflows.html
+.markdown-body {
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 32px !important;
+}
+
+@media (max-width: 640px) {
+  .markdown-body {
+    padding: 20px 16px !important;
+    margin-left: 8px;
+    margin-right: 8px;
+  }
+}
+
+.markdown-body a { color: var(--accent); }
+.markdown-body h1,
+.markdown-body h2 { border-bottom-color: var(--line); }
+.markdown-body hr { background-color: var(--line); }
+.markdown-body blockquote { color: var(--muted); border-left-color: var(--line); }
+.markdown-body code { background-color: var(--code-bg); color: var(--ink); }
+.markdown-body pre,
+.markdown-body .highlight pre { background-color: var(--code-bg); color: var(--ink); }
+.markdown-body pre code { background: transparent; }
+.markdown-body table th,
+.markdown-body table td { border-color: var(--line); }
+.markdown-body table tr { background-color: transparent; border-top-color: var(--line); }
+.markdown-body table tr:nth-child(2n) { background-color: var(--code-bg); }
+
+// The theme's syntax colours are made for a white background; in dark mode keep code readable
+@media (prefers-color-scheme: dark) {
+  .markdown-body .highlight span { color: var(--ink) !important; background: transparent !important; }
+  .markdown-body .highlight .c,
+  .markdown-body .highlight .c1,
+  .markdown-body .highlight .cm { color: var(--muted) !important; }
+  .markdown-body .highlight .s,
+  .markdown-body .highlight .s1,
+  .markdown-body .highlight .s2 { color: #86efac !important; }
+}
