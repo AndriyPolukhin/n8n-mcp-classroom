@@ -31,7 +31,7 @@
         "specifyInputSchema": true,
         "schemaType": "manual",
         "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"text\": { \"type\": \"string\", \"description\": \"The text to analyse\" }\n  },\n  \"required\": [\"text\"]\n}",
-        "jsCode": "const text = String(query.text ?? '');\nconst words = text.trim() ? text.trim().split(/\\s+/).length : 0;\nconst sentences = (text.match(/[.!?…]+/g) || []).length;\nreturn JSON.stringify({ words, characters: text.length, sentences, reading_minutes: Math.max(1, Math.round(words / 200)) });"
+        "jsCode": "const text = String(query.text ?? '');\n// A word = a whitespace-separated token with at least one letter or digit (so '—' or '...' do not count)\nconst words = text.split(/\\s+/).filter((w) => /[\\p{L}\\p{N}]/u.test(w)).length;\nconst sentences = (text.match(/[.!?…]+/g) || []).length;\nreturn JSON.stringify({ words, characters: text.length, sentences, reading_minutes: Math.max(1, Math.round(words / 200)) });"
       }
     },
     {
@@ -49,7 +49,7 @@
         "specifyInputSchema": true,
         "schemaType": "manual",
         "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"title\": { \"type\": \"string\", \"description\": \"Title to convert\" }\n  },\n  \"required\": [\"title\"]\n}",
-        "jsCode": "const map = {а:'a',б:'b',в:'v',г:'h',ґ:'g',д:'d',е:'e',є:'ie',ж:'zh',з:'z',и:'y',і:'i',ї:'i',й:'i',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'kh',ц:'ts',ч:'ch',ш:'sh',щ:'shch',ь:'',ю:'iu',я:'ia',\"'\":'','’':''};\nconst slug = String(query.title ?? '').toLowerCase().split('').map(c => map[c] ?? c).join('')\n  .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');\nreturn slug;"
+        "jsCode": "const map = {а:'a',б:'b',в:'v',г:'h',ґ:'g',д:'d',е:'e',є:'ie',ж:'zh',з:'z',и:'y',і:'i',ї:'i',й:'i',к:'k',л:'l',м:'m',н:'n',о:'o',п:'p',р:'r',с:'s',т:'t',у:'u',ф:'f',х:'kh',ц:'ts',ч:'ch',ш:'sh',щ:'shch',ь:'',ю:'iu',я:'ia',\"'\":'','’':''};\nconst slug = String(query.title ?? '').toLowerCase().split('').map(c => map[c] ?? c).join('')\n  .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');\n// An empty slug is useless as a URL or file name: report it as a tool error instead of returning ''\nif (!slug) throw new Error('title must contain at least one letter or digit, got: ' + JSON.stringify(query.title ?? ''));\nreturn slug;"
       }
     },
     {
@@ -67,7 +67,7 @@
         "specifyInputSchema": true,
         "schemaType": "manual",
         "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"block\": { \"type\": \"number\", \"description\": \"Block number 1-4 (optional)\" }\n  }\n}",
-        "jsCode": "const blocks = [\n  { block: 1, minutes: 20, title: 'Cloud dev: n8n in Codespaces', goal: 'Everyone has a running n8n without installing anything' },\n  { block: 2, minutes: 20, title: 'Workflows as code', goal: 'Import, change, export a workflow via git + API' },\n  { block: 3, minutes: 25, title: 'n8n as an MCP server', goal: 'Expose n8n tools to any AI client' },\n  { block: 4, minutes: 25, title: 'AI builds automation', goal: 'Claude Code + MCP creates a workflow from a sentence' }\n];\nconst n = Number(query.block);\nreturn JSON.stringify(n ? blocks.find(b => b.block === n) ?? { error: 'block must be 1-4' } : blocks);"
+        "jsCode": "const blocks = [\n  { block: 1, minutes: 20, title: 'Cloud dev: n8n in Codespaces', goal: 'Everyone has a running n8n without installing anything' },\n  { block: 2, minutes: 20, title: 'Workflows as code', goal: 'Import, change, export a workflow via git + API' },\n  { block: 3, minutes: 25, title: 'n8n as an MCP server', goal: 'Expose n8n tools to any AI client' },\n  { block: 4, minutes: 25, title: 'AI builds automation', goal: 'Claude Code + MCP creates a workflow from a sentence' }\n];\n// No block given → whole schedule\nif (query.block === undefined || query.block === null || query.block === '') return JSON.stringify(blocks);\nconst n = Number(query.block);\nconst found = blocks.find((b) => b.block === n);\n// Unknown block → tool error (MCP isError), not a normal-looking text result\nif (!found) throw new Error('block must be an integer from 1 to 4, got: ' + JSON.stringify(query.block));\nreturn JSON.stringify(found);"
       }
     }
   ],
