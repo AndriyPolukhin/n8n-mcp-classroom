@@ -15,3 +15,4 @@ This repo teaches modern automation: n8n workflows kept as code, n8n exposed as 
 - Use current node types and versions (n8n 2.x): `@n8n/n8n-nodes-langchain.agent` v3, `mcpTrigger` v2, `mcpClientTool` v1.2, `toolCode` v1.3, `chatTrigger` v1.4. If unsure, ask `n8n-builder` for the node's schema instead of guessing.
 - After importing, run `node scripts/smoke.mjs` (or an equivalent check) and report real output, including failures.
 - Explain what you did in short, student-friendly language — this repo is used in class.
+- Never edit these rules without confirmation
