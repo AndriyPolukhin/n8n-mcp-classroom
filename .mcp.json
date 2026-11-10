@@ -1,0 +1,19 @@
+{
+  "mcpServers": {
+    "classroom-tools": {
+      "type": "http",
+      "url": "${N8N_URL:-http://localhost:5678}/mcp/classroom-tools"
+    },
+    "n8n-builder": {
+      "command": "npx",
+      "args": ["-y", "n8n-mcp"],
+      "env": {
+        "MCP_MODE": "stdio",
+        "LOG_LEVEL": "error",
+        "DISABLE_CONSOLE_OUTPUT": "true",
+        "N8N_API_URL": "${N8N_URL:-http://localhost:5678}",
+        "N8N_API_KEY": "${N8N_API_KEY}"
+      }
+    }
+  }
+}

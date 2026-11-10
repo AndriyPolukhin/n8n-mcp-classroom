@@ -1,0 +1,133 @@
+{
+  "name": "Classroom · 01 Webhook → AI Triage",
+  "nodes": [
+    {
+      "id": "a1f0c001-0000-4000-8000-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "classroom-triage",
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "classroom-triage",
+        "responseMode": "responseNode",
+        "options": {}
+      }
+    },
+    {
+      "id": "a1f0c001-0000-4000-8000-000000000002",
+      "name": "Triage Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        260,
+        0
+      ],
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.message }}",
+        "options": {
+          "systemMessage": "You are a support triage assistant for an online course. Classify the student's message. Reply with ONLY a JSON object, no markdown: {\"category\": \"bug\" | \"question\" | \"billing\" | \"feedback\", \"priority\": \"low\" | \"medium\" | \"high\", \"summary\": \"one sentence\", \"suggested_reply\": \"short, friendly reply in the student's language\"}"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "id": "a1f0c001-0000-4000-8000-000000000003",
+      "name": "OpenRouter Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        260,
+        220
+      ],
+      "parameters": {
+        "model": "openai/gpt-4.1-mini",
+        "options": {
+          "temperature": 0.2
+        }
+      }
+    },
+    {
+      "id": "a1f0c001-0000-4000-8000-000000000004",
+      "name": "Parse JSON",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        0
+      ],
+      "parameters": {
+        "jsCode": "// If the LLM call failed (bad/expired key, rate limit…), the agent passes the error on instead of crashing.\nif ($json.error) {\n  return [{ json: { ok: false, error: typeof $json.error === 'string' ? $json.error : ($json.error.description || $json.error.message || 'LLM call failed') } }];\n}\n// LLMs sometimes wrap JSON in ```fences``` — strip them defensively.\nconst raw = String($json.output ?? '').replace(/```(json)?/g, '').trim();\nlet triage;\ntry { triage = JSON.parse(raw); } catch (e) { triage = { category: 'unknown', priority: 'medium', summary: raw, parse_error: true }; }\nreturn [{ json: { ok: true, triage, received_at: new Date().toISOString() } }];"
+      }
+    },
+    {
+      "id": "a1f0c001-0000-4000-8000-000000000005",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        800,
+        0
+      ],
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ $json }}",
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Triage Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Triage Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Triage Agent": {
+      "main": [
+        [
+          {
+            "node": "Parse JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse JSON": {
+      "main": [
+        [
+          {
+            "node": "Respond",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  }
+}

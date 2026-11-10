@@ -1,0 +1,23 @@
+services:
+  n8n:
+    image: docker.n8n.io/n8nio/n8n:latest
+    restart: unless-stopped
+    environment:
+      - GENERIC_TIMEZONE=Europe/Kyiv
+      - TZ=Europe/Kyiv
+      - N8N_PROXY_HOPS=1
+      - N8N_DIAGNOSTICS_ENABLED=false
+      - N8N_RUNNERS_ENABLED=true
+    volumes:
+      - n8n_data:/home/node/.n8n
+
+  # Your terminal / editor. Shares n8n's network, so http://localhost:5678 works from here too.
+  dev:
+    image: mcr.microsoft.com/devcontainers/javascript-node:1-22-bookworm
+    command: sleep infinity
+    network_mode: service:n8n
+    volumes:
+      - ..:/workspaces/n8n-mcp-classroom:cached
+
+volumes:
+  n8n_data:
