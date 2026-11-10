@@ -1,0 +1,347 @@
+---
+layout: null
+title: Карта воркфлоу
+---
+<!doctype html>
+<html lang="uk">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Карта воркфлоу · n8n MCP Classroom</title>
+<meta name="description" content="Візуальна карта воркфлоу n8n MCP Classroom, згенерована напряму з workflows/*.json.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;700&family=Manrope:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<style>
+:root{
+  --bg:#f5f3ee;--panel:#fffdf8;--ink:#1c1b19;--muted:#6b6862;--line:#d9d5cc;--grid:#e7e3da;
+  --trigger:#c2410c;--trigger-bg:#fff1e8;
+  --agent:#5b3fd1;--agent-bg:#efeafe;
+  --sub:#0f766e;--sub-bg:#e2f5f1;
+  --code:#475569;--code-bg:#eef1f5;
+  --accent:#5b3fd1;--ok:#15803d;
+  --mono:"JetBrains Mono",ui-monospace,monospace;--sans:"Manrope",system-ui,sans-serif;--display:"Unbounded","Manrope",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#121212;--panel:#1b1b1a;--ink:#ecebe7;--muted:#a3a09a;--line:#34322e;--grid:#222120;
+  --trigger:#fb923c;--trigger-bg:#2a1a10;
+  --agent:#a78bfa;--agent-bg:#221a3d;
+  --sub:#2dd4bf;--sub-bg:#0f2a27;
+  --code:#94a3b8;--code-bg:#1e2228;
+  --accent:#a78bfa;--ok:#4ade80;
+}}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:16px;line-height:1.6;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:32px 32px}
+a{color:var(--accent)}
+.wrap{max-width:1080px;margin:0 auto;padding:0 16px}
+header{padding:48px 0 24px}
+.crumbs{font-size:14px;display:flex;gap:16px;flex-wrap:wrap}
+.crumbs a{text-decoration:none;font-weight:600}
+h1{font-family:var(--display);font-weight:700;font-size:clamp(28px,5vw,48px);line-height:1.1;margin:16px 0 12px;letter-spacing:-.01em}
+.lede{max-width:720px;color:var(--muted);font-size:17px;margin:0}
+.lede code,.note code{font-family:var(--mono);font-size:.9em;background:var(--code-bg);padding:1px 6px;border-radius:4px;color:var(--ink)}
+.legend{display:flex;flex-wrap:wrap;gap:8px 16px;margin:20px 0 0;font-size:13px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.sw{width:12px;height:12px;border-radius:3px;border:1.5px solid}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:20px;margin:20px 0}
+h2{font-family:var(--display);font-weight:500;font-size:22px;margin:0 0 4px;line-height:1.25}
+.kicker{font-family:var(--mono);font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+.wf-head{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start}
+.wf-desc{color:var(--muted);margin:6px 0 0;max-width:640px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.chip{font-family:var(--mono);font-size:12px;border:1px solid var(--line);border-radius:999px;padding:2px 10px;color:var(--muted)}
+.src{font-size:14px;font-weight:600;text-decoration:none;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
+.canvas{margin-top:16px;border:1px dashed var(--line);border-radius:10px;overflow-x:auto;background:var(--bg)}
+.canvas svg{display:block;min-width:620px;width:100%;height:auto}
+.node{cursor:pointer}
+.node:focus{outline:none}
+.node:focus-visible rect.box,.node.sel rect.box{stroke-width:2.5}
+.node:hover rect.box{filter:brightness(.97)}
+.ntitle{font-family:var(--sans);font-weight:600;font-size:14px;fill:var(--ink)}
+.ntype{font-family:var(--mono);font-size:11px;fill:var(--muted)}
+.elabel{font-family:var(--mono);font-size:11px;fill:var(--muted)}
+.edge{fill:none;stroke:var(--muted);stroke-width:1.6}
+.edge.ai{stroke-dasharray:5 4}
+.details{margin-top:14px;border-top:1px solid var(--line);padding-top:14px;min-height:60px}
+.details .hint{color:var(--muted);font-size:14px;margin:0}
+.dt-title{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:0 0 8px;font-weight:600}
+.dt-title i{font-size:20px}
+dl{display:grid;grid-template-columns:minmax(110px,max-content) 1fr;gap:6px 14px;margin:0;font-size:14px}
+dt{color:var(--muted);font-family:var(--mono);font-size:12px;padding-top:2px}
+dd{margin:0;min-width:0}
+pre{font-family:var(--mono);font-size:12.5px;line-height:1.55;background:var(--code-bg);border-radius:8px;padding:10px 12px;margin:0;overflow-x:auto;white-space:pre}
+.inline{font-family:var(--mono);font-size:13px;word-break:break-all}
+.map svg{display:block;width:100%;height:auto;min-width:620px}
+.note{font-size:14px;color:var(--muted);margin:12px 0 0}
+.status{color:var(--muted);font-size:14px}
+.err{color:var(--trigger)}
+footer{padding:24px 0 48px;color:var(--muted);font-size:14px}
+.scroll-hint{display:none;font-size:12px;color:var(--muted);margin:6px 0 0;font-family:var(--mono)}
+@media (max-width:760px){.canvas svg{min-width:840px}.map svg{min-width:760px}.scroll-hint{display:block}}
+@media (max-width:640px){.card{padding:14px}dl{grid-template-columns:1fr}dt{padding-top:6px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <nav class="crumbs" aria-label="Навігація">
+    <a href="./">← README</a>
+    <a href="LESSON.html">План заняття</a>
+    <a href="https://github.com/AndriyPolukhin/n8n-mcp-classroom">GitHub</a>
+  </nav>
+  <h1>Карта воркфлоу</h1>
+  <p class="lede">Ця сторінка не намальована вручну: вона читає <code>workflows/*.json</code> з репозиторію і будує схему з того самого коду, який імпортується в n8n. Додайте новий воркфлоу в git — і після публікації він з'явиться тут.</p>
+  <div class="legend" aria-label="Легенда">
+    <span><i class="sw" style="background:var(--trigger-bg);border-color:var(--trigger)"></i>Тригер</span>
+    <span><i class="sw" style="background:var(--agent-bg);border-color:var(--agent)"></i>ШІ-агент</span>
+    <span><i class="sw" style="background:var(--sub-bg);border-color:var(--sub)"></i>Модель, пам'ять, інструмент</span>
+    <span><i class="sw" style="background:var(--code-bg);border-color:var(--code)"></i>Код і відповідь</span>
+    <span>── дані (main) &nbsp; ┄┄ ШІ-з'єднання (ai_*)</span>
+  </div>
+</header>
+
+<section class="card map" aria-labelledby="map-h">
+  <div class="kicker">Система</div>
+  <h2 id="map-h">Як воркфлоу пов'язані між собою</h2>
+  <p class="wf-desc">Хто викликає кожен воркфлоу. Зв'язок між 03 і 02 знайдено автоматично: адреса в MCP Client Tool збігається зі шляхом MCP Server Trigger.</p>
+  <div class="canvas" id="system-map"><p class="status" style="padding:16px">Завантажую воркфлоу…</p></div>
+  <p class="scroll-hint">← прокрутіть схему вбік →</p>
+</section>
+
+<main id="workflows"></main>
+
+<footer>Згенеровано у браузері з JSON-файлів воркфлоу. Ключі й credentials у репозиторії не зберігаються — <code>export.mjs</code> їх вирізає.</footer>
+</div>
+
+<script type="application/json" id="wf-files">{{ site.static_files | where_exp: "f", "f.path contains '/workflows/'" | map: "path" | jsonify }}</script>
+<script>
+(function () {
+  var REPO = 'AndriyPolukhin/n8n-mcp-classroom';
+  var FALLBACK = ['workflows/01-webhook-ai-triage.json', 'workflows/02-mcp-server-tools.json', 'workflows/03-agent-with-mcp-client.json'];
+  var ABOUT = {
+    '01': 'HTTP-тригер, ШІ-агент з OpenRouter, захисний розбір JSON і зрозуміла помилка, якщо LLM не відповів.',
+    '02': 'n8n як MCP-сервер: три Code-інструменти, які може викликати будь-який ШІ-клієнт.',
+    '03': 'n8n як MCP-клієнт: агент сам дізнається про інструменти з воркфлоу 02 і використовує їх.'
+  };
+  var NW = 184, NH = 64, SW = 196, SH = 52, PAD = 36, CW = 1000, SX = 1, GAP = 24;
+
+  function esc(s) { return String(s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  function short(t) { return t.split('.').pop(); }
+  function kind(n) {
+    var t = n.type;
+    if (/Trigger$|\.webhook$/i.test(t)) return 'trigger';
+    if (/\.agent$/.test(t)) return 'agent';
+    if (/lmChat|memory|tool/i.test(t)) return 'sub';
+    return 'code';
+  }
+  function icon(n) {
+    var t = short(n.type);
+    var m = { webhook: 'ti-webhook', chatTrigger: 'ti-message-circle', mcpTrigger: 'ti-plug-connected', agent: 'ti-robot', lmChatOpenRouter: 'ti-brain', memoryBufferWindow: 'ti-database', toolCode: 'ti-code', mcpClientTool: 'ti-plug', code: 'ti-braces', respondToWebhook: 'ti-send' };
+    return m[t] || 'ti-box';
+  }
+  var GLYPH = {};
+  function glyph(cls) {
+    if (GLYPH[cls] === undefined) {
+      var el = document.createElement('i');
+      el.className = 'ti ' + cls;
+      el.style.position = 'absolute'; el.style.visibility = 'hidden';
+      document.body.appendChild(el);
+      var c = getComputedStyle(el, '::before').content || '';
+      document.body.removeChild(el);
+      GLYPH[cls] = c && c !== 'none' ? c.replace(/^["']|["']$/g, '') : '';
+    }
+    return GLYPH[cls];
+  }
+  var AI_LABEL = { ai_languageModel: 'модель', ai_memory: "пам'ять", ai_tool: 'інструмент' };
+  function colors(k) { return { trigger: ['--trigger-bg', '--trigger'], agent: ['--agent-bg', '--agent'], sub: ['--sub-bg', '--sub'], code: ['--code-bg', '--code'] }[k]; }
+  function numOf(wf) { var m = wf.name.match(/\b(\d{2})\b/); return m ? m[1] : ''; }
+  function titleOf(wf) { return wf.name.replace(/^.*?\d{2}\s*/, '') || wf.name; }
+
+  function load(path) {
+    return fetch(path).then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .catch(function () {
+        return fetch('https://raw.githubusercontent.com/' + REPO + '/main/' + path).then(function (r) { if (!r.ok) throw new Error(path + ': ' + r.status); return r.json(); });
+      })
+      .then(function (wf) { wf.__file = path; return wf; });
+  }
+
+  function fileList() {
+    try {
+      var arr = JSON.parse(document.getElementById('wf-files').textContent);
+      var files = arr.map(function (p) { return p.replace(/^\//, ''); }).filter(function (p) { return /^workflows\/[^/]+\.json$/.test(p); }).sort();
+      if (files.length) return files;
+    } catch (e) {}
+    return FALLBACK;
+  }
+
+  function layout(wf) {
+    var subs = {};
+    Object.keys(wf.connections || {}).forEach(function (src) {
+      var outs = wf.connections[src];
+      var types = Object.keys(outs);
+      if (types.length && types.every(function (t) { return t.indexOf('ai_') === 0; })) subs[src] = true;
+    });
+    var xs = wf.nodes.map(function (n) { return n.position[0]; }), ys = wf.nodes.map(function (n) { return n.position[1]; });
+    var minX = Math.min.apply(null, xs), minY = Math.min.apply(null, ys);
+    var pos = {};
+    wf.nodes.forEach(function (n) {
+      var isSub = !!subs[n.name];
+      pos[n.name] = { x: (n.position[0] - minX) * SX + PAD, y: (n.position[1] - minY) * 0.85 + PAD, w: isSub ? SW : NW, h: isSub ? SH : NH, sub: isSub, node: n };
+    });
+    // Nodes on the same row must not overlap: push each one right of its left neighbour if needed
+    var rows = {};
+    Object.keys(pos).forEach(function (k) { (rows[pos[k].y] = rows[pos[k].y] || []).push(pos[k]); });
+    Object.keys(rows).forEach(function (y) {
+      var r = rows[y].sort(function (a, b) { return a.x - b.x; });
+      for (var i = 1; i < r.length; i++) r[i].x = Math.max(r[i].x, r[i - 1].x + r[i - 1].w + GAP);
+    });
+    var maxX = 0, maxY = 0;
+    Object.keys(pos).forEach(function (k) { var p = pos[k]; maxX = Math.max(maxX, p.x + p.w); maxY = Math.max(maxY, p.y + p.h); });
+    // One shared width for every canvas so text has the same size in all workflows; narrow workflows are centred
+    var w = Math.max(CW, maxX + PAD), shift = (w - (maxX + PAD)) / 2;
+    Object.keys(pos).forEach(function (k) { pos[k].x += shift; });
+    return { pos: pos, w: w, h: maxY + PAD + 8 };
+  }
+
+  function nodeSvg(p, idx, wfi) {
+    var n = p.node, k = kind(n), c = colors(k), ic = icon(n);
+    var cx = p.x + 18, ty = p.sub ? p.y + 21 : p.y + 25;
+    var fit = function (s, chars) { return s.length > chars ? s.slice(0, chars - 1) + '…' : s; };
+    var name = fit(n.name, Math.floor((p.w - 46) / 7.4));
+    var typ = fit(short(n.type) + ' v' + n.typeVersion, Math.floor((p.w - 46) / 6.6));
+    return '<g class="node" tabindex="0" role="button" data-wf="' + wfi + '" data-node="' + idx + '" aria-label="' + esc(n.name + ', ' + short(n.type)) + '">' +
+      '<title>' + esc(n.name) + '</title>' +
+      '<rect class="box" x="' + p.x + '" y="' + p.y + '" width="' + p.w + '" height="' + p.h + '" rx="' + (p.sub ? 26 : 10) + '" style="fill:var(' + c[0] + ');stroke:var(' + c[1] + ')" stroke-width="1.5"/>' +
+      '<text x="' + cx + '" y="' + (p.y + p.h / 2 + 7) + '" text-anchor="middle" style="font-family:tabler-icons;font-size:20px;fill:var(' + c[1] + ')">' + esc(glyph(ic)) + '</text>' +
+      '<text class="ntitle" x="' + (p.x + 36) + '" y="' + ty + '">' + esc(name) + '</text>' +
+      '<text class="ntype" x="' + (p.x + 36) + '" y="' + (ty + 17) + '">' + esc(typ) + '</text>' +
+      '</g>';
+  }
+
+  function canvasSvg(wf, wfi) {
+    var L = layout(wf), pos = L.pos, edges = '', labels = '', aiCount = {};
+    Object.keys(wf.connections || {}).forEach(function (src) {
+      Object.keys(wf.connections[src]).forEach(function (type) {
+        (wf.connections[src][type] || []).forEach(function (branch) {
+          (branch || []).forEach(function (c) {
+            var a = pos[src], b = pos[c.node];
+            if (!a || !b) return;
+            if (type === 'main') {
+              var x1 = a.x + a.w, y1 = a.y + a.h / 2, x2 = b.x - 2, y2 = b.y + b.h / 2, dx = Math.max(30, (x2 - x1) / 2);
+              edges += '<path class="edge" marker-end="url(#ah)" d="M' + x1 + ' ' + y1 + ' C' + (x1 + dx) + ' ' + y1 + ' ' + (x2 - dx) + ' ' + y2 + ' ' + x2 + ' ' + y2 + '"/>';
+            } else {
+              aiCount[c.node] = (aiCount[c.node] || 0) + 1;
+              var sx = a.x + a.w / 2, sy = a.y, tx = b.x + b.w / 2, ty = b.y + b.h + 2, my = (sy + ty) / 2;
+              var col = 'var(--sub)';
+              edges += '<path class="edge ai" style="stroke:' + col + '" marker-end="url(#ah)" d="M' + sx + ' ' + sy + ' C' + sx + ' ' + my + ' ' + tx + ' ' + my + ' ' + tx + ' ' + ty + '"/>';
+              labels += '<text class="elabel" x="' + (sx + 6) + '" y="' + (sy - 8) + '">' + esc(AI_LABEL[type] || type) + '</text>';
+            }
+          });
+        });
+      });
+    });
+    var nodes = wf.nodes.map(function (n, i) { return nodeSvg(pos[n.name], i, wfi); }).join('');
+    return '<svg viewBox="0 0 ' + L.w + ' ' + L.h + '" role="img" aria-label="Схема воркфлоу ' + esc(wf.name) + '">' +
+      '<defs><marker id="ah" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>' +
+      edges + labels + nodes + '</svg>';
+  }
+
+  function paramRows(n) {
+    var p = n.parameters || {}, o = p.options || {}, rows = [];
+    function add(label, val, code) { if (val === undefined || val === null || val === '') return; rows.push('<dt>' + esc(label) + '</dt><dd>' + (code ? '<pre>' + esc(val) + '</pre>' : '<span class="inline">' + esc(val) + '</span>') + '</dd>'); }
+    add('тип', n.type + ' v' + n.typeVersion);
+    if (p.httpMethod || p.path) add('endpoint', (p.httpMethod ? p.httpMethod + ' ' : '') + (/mcpTrigger/.test(n.type) ? '/mcp/' : '/webhook/') + (p.path || ''));
+    add('auth', p.authentication);
+    add('description', p.description);
+    add('model', p.model);
+    if (o.temperature !== undefined) add('temperature', o.temperature);
+    add('contextWindow', p.contextWindowLength);
+    add('endpointUrl', p.endpointUrl);
+    add('transport', p.serverTransport);
+    add('prompt', typeof p.text === 'string' ? p.text : undefined);
+    add('systemMessage', o.systemMessage, true);
+    if (p.inputSchema) { var s = p.inputSchema; try { s = JSON.stringify(JSON.parse(s), null, 2); } catch (e) {} add('inputSchema', s, true); }
+    add('jsCode', p.jsCode, true);
+    add('responseBody', p.responseBody);
+    add('onError', n.onError);
+    return rows.join('');
+  }
+
+  function showDetails(wfi, idx) {
+    var wf = WF[wfi], n = wf.nodes[idx], box = document.getElementById('details-' + wfi), c = colors(kind(n));
+    document.querySelectorAll('[data-wf="' + wfi + '"].node').forEach(function (g) { g.classList.toggle('sel', +g.getAttribute('data-node') === idx); });
+    box.innerHTML = '<p class="dt-title"><i class="ti ' + icon(n) + '" style="color:var(' + c[1] + ')" aria-hidden="true"></i>' + esc(n.name) + '</p><dl>' + paramRows(n) + '</dl>';
+  }
+
+  function sectionHtml(wf, wfi) {
+    var num = numOf(wf), triggers = wf.nodes.filter(function (n) { return kind(n) === 'trigger'; }).length;
+    var ai = 0; Object.keys(wf.connections || {}).forEach(function (s) { Object.keys(wf.connections[s]).forEach(function (t) { if (t.indexOf('ai_') === 0) ai++; }); });
+    return '<section class="card" id="wf-' + (num || wfi) + '" aria-labelledby="wf-h-' + wfi + '">' +
+      '<div class="wf-head"><div><div class="kicker">Воркфлоу ' + esc(num) + '</div>' +
+      '<h2 id="wf-h-' + wfi + '">' + esc(titleOf(wf)) + '</h2>' +
+      '<p class="wf-desc">' + esc(ABOUT[num] || 'Воркфлоу з ' + wf.nodes.length + ' вузлів.') + '</p>' +
+      '<div class="chips"><span class="chip">' + wf.nodes.length + ' вузлів</span><span class="chip">' + triggers + ' тригер</span><span class="chip">' + ai + ' ШІ-з’єднань</span></div></div>' +
+      '<a class="src" href="https://github.com/' + REPO + '/blob/main/' + esc(wf.__file) + '"><i class="ti ti-file-code" aria-hidden="true"></i>' + esc(wf.__file.split('/').pop()) + '</a></div>' +
+      '<div class="canvas">' + canvasSvg(wf, wfi) + '</div><p class="scroll-hint">← прокрутіть схему вбік →</p>' +
+      '<div class="details" id="details-' + wfi + '" aria-live="polite"><p class="hint">Натисніть на вузол, щоб побачити його налаштування й код.</p></div>' +
+      '</section>';
+  }
+
+  function systemMap(wfs) {
+    var rowH = 92, W = 900, H = wfs.length * rowH + 40, out = '', mcpPaths = {};
+    var AX = 16, AW = 260, EX1 = AX + AW + 8, BX = 492, BW = 300, EX2 = BX - 4;
+    wfs.forEach(function (wf, i) { wf.nodes.forEach(function (n) { if (/mcpTrigger/.test(n.type)) mcpPaths[n.parameters.path] = i; }); });
+    wfs.forEach(function (wf, i) {
+      var y = 24 + i * rowH, trig = wf.nodes.filter(function (n) { return kind(n) === 'trigger'; })[0], actor = 'Клієнт', via = '', ic = 'ti-box';
+      if (trig) {
+        var t = short(trig.type), p = trig.parameters || {};
+        if (t === 'webhook') { actor = 'HTTP-клієнт: curl, сайт'; via = (p.httpMethod || 'POST') + ' /webhook/' + p.path; }
+        else if (t === 'mcpTrigger') { actor = 'Claude, Cursor, MCP-клієнти'; via = 'MCP  /mcp/' + p.path; }
+        else if (t === 'chatTrigger') { actor = 'Студент у чаті n8n'; via = 'чат-повідомлення'; }
+      }
+      out += '<g><rect x="' + AX + '" y="' + y + '" width="' + AW + '" height="56" rx="28" style="fill:var(--panel);stroke:var(--line)" stroke-width="1.5"/>' +
+        '<text class="ntitle" x="' + (AX + AW / 2) + '" y="' + (y + 33) + '" text-anchor="middle">' + esc(actor) + '</text></g>';
+      out += '<path class="edge" marker-end="url(#am)" d="M' + EX1 + ' ' + (y + 28) + ' L' + EX2 + ' ' + (y + 28) + '"/>' +
+        '<text class="elabel" x="' + ((EX1 + EX2) / 2) + '" y="' + (y + 18) + '" text-anchor="middle">' + esc(via.length > 30 ? via.slice(0, 29) + '…' : via) + '</text>';
+      var num = numOf(wf), tt = titleOf(wf);
+      out += '<a href="#wf-' + (num || i) + '"><g class="node"><rect class="box" x="' + BX + '" y="' + y + '" width="' + BW + '" height="56" rx="10" style="fill:var(--agent-bg);stroke:var(--agent)" stroke-width="1.5"/>' +
+        '<text class="ntitle" x="' + (BX + 18) + '" y="' + (y + 24) + '">' + esc(num ? num + ' · ' : '') + esc(tt.length > 30 ? tt.slice(0, 29) + '…' : tt) + '</text>' +
+        '<text class="ntype" x="' + (BX + 18) + '" y="' + (y + 42) + '">' + wf.nodes.length + ' вузлів · натисніть, щоб перейти</text></g></a>';
+    });
+    wfs.forEach(function (wf, i) {
+      wf.nodes.forEach(function (n) {
+        if (!/mcpClientTool/.test(n.type)) return;
+        var url = n.parameters.endpointUrl || '', m = url.match(/\/mcp\/([^/?#]+)/);
+        if (!m || mcpPaths[m[1]] === undefined || mcpPaths[m[1]] === i) return;
+        var j = mcpPaths[m[1]], y1 = 24 + i * rowH + 28, y2 = 24 + j * rowH + 28;
+        var R = BX + BW;
+        out += '<path class="edge ai" style="stroke:var(--sub)" marker-end="url(#am)" d="M' + (R + 2) + ' ' + y1 + ' C' + (R + 96) + ' ' + y1 + ' ' + (R + 96) + ' ' + y2 + ' ' + (R + 4) + ' ' + y2 + '"/>' +
+          '<text class="elabel" x="' + (R + 14) + '" y="' + ((y1 + y2) / 2 - 6) + '" style="fill:var(--sub)">MCP Client</text>' +
+          '<text class="elabel" x="' + (R + 14) + '" y="' + ((y1 + y2) / 2 + 9) + '" style="fill:var(--sub)">tools/call</text>';
+      });
+    });
+    return '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Карта системи: хто викликає кожен воркфлоу">' +
+      '<defs><marker id="am" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M2 1L8 5L2 9" fill="none" stroke="context-stroke" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></marker></defs>' + out + '</svg>';
+  }
+
+  var WF = [];
+  Promise.all(fileList().map(function (f) { return load(f).catch(function (e) { return { __error: String(e), __file: f }; }); }))
+    .then(function (list) {
+      var bad = list.filter(function (w) { return w.__error; });
+      WF = list.filter(function (w) { return !w.__error && Array.isArray(w.nodes); });
+      document.getElementById('system-map').innerHTML = WF.length ? systemMap(WF) : '<p class="status err" style="padding:16px">Не вдалося завантажити воркфлоу.</p>';
+      document.getElementById('workflows').innerHTML = WF.map(sectionHtml).join('') +
+        (bad.length ? '<p class="status err">Не завантажено: ' + bad.map(function (b) { return esc(b.__file); }).join(', ') + '</p>' : '');
+      document.querySelectorAll('#workflows .node').forEach(function (g) {
+        var go = function () { showDetails(+g.getAttribute('data-wf'), +g.getAttribute('data-node')); };
+        g.addEventListener('click', go);
+        g.addEventListener('keydown', function (e) { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); go(); } });
+      });
+    });
+})();
+</script>
+</body>
+</html>

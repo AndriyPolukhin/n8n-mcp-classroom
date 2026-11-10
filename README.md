@@ -23,6 +23,8 @@ A hands-on starter kit for one practical class on **modern automation**:
 
 The lesson plan (in Ukrainian) is in **[LESSON.md](LESSON.md)**.
 
+**[Visual workflow map](https://andriypolukhin.github.io/n8n-mcp-classroom/workflows.html)** (in Ukrainian) draws every workflow straight from `workflows/*.json`: nodes, connections, and each node's settings and code. Add a workflow to the repo and it shows up there after the next Pages build.
+
 ## Quick start: Codespaces (recommended for students)
 
 1. Click **Code → Codespaces → Create codespace on main**.
